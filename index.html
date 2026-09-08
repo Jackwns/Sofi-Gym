@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TitanFit • Rutina Pro de Gimnasio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0a0d14;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 35, 54, 0.85);
+      --bg-card-done: rgba(16, 44, 38, 0.6);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --accent-primary: #6366f1;
+      --accent-secondary: #10b981;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%);
+      background-attachment: fixed;
+      padding-bottom: 90px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Header & Streak Bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Fire Streak Widget */
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 18px;
+      border-radius: 999px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .streak-badge:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .flame-container {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flame-svg {
+      width: 100%;
+      height: 100%;
+      transition: var(--transition-smooth);
+    }
+
+    .streak-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .streak-days {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .streak-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Flame Color States */
+    /* 0 Días: Gris */
+    .streak-tier-0 .flame-svg {
+      filter: grayscale(100%) opacity(0.5);
+    }
+    .streak-tier-0 .flame-path-base { fill: #64748b; }
+    .streak-tier-0 .flame-path-inner { fill: #94a3b8; }
+    .streak-tier-0 .flame-path-spark { fill: #cbd5e1; opacity: 0.4; }
+    .streak-tier-0 .streak-days { color: #94a3b8; }
+
+    /* 1 Día: Amarillo / Naranja */
+    .streak-tier-1 .flame-svg {
+      filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.65));
+      animation: flamePulse 2s infinite ease-in-out;
+    }
+    .streak-tier-1 .flame-path-base { fill: url(#grad-orange); }
+    .streak-tier-1 .flame-path-inner { fill: url(#grad-yellow); }
+    .streak-tier-1 .flame-path-spark { fill: #fef08a; }
+    .streak-tier-1 .streak-days { color: #fb923c; }
+
+    /* 2 Días: Cyan / Azul */
+    .streak-tier-2 .flame-svg {
+      filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.75));
+      animation: flamePulse 1.8s infinite ease-in-out;
+    }
+    .streak-tier-2 .flame-path-base { fill: url(#grad-blue); }
+    .streak-tier-2 .flame-path-inner { fill: url(#grad-cyan); }
+    .streak-tier-2 .flame-path-spark { fill: #a5f3fc; }
+    .streak-tier-2 .streak-days { color: #38bdf8; }
+
+    /* 3 Días: Magenta / Púrpura */
+    .streak-tier-3 .flame-svg {
+      filter: drop-shadow(0 0 14px rgba(217, 70, 239, 0.8));
+      animation: flamePulse 1.6s infinite ease-in-out;
+    }
+    .streak-tier-3 .flame-path-base { fill: url(#grad-purple); }
+    .streak-tier-3 .flame-path-inner { fill: url(#grad-magenta); }
+    .streak-tier-3 .flame-path-spark { fill: #f5d0fe; }
+    .streak-tier-3 .streak-days { color: #e879f9; }
+
+    /* 4+ Días: Arcoíris */
+    .streak-tier-4 .flame-svg {
+      filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.8)) drop-shadow(0 0 25px rgba(56, 189, 248, 0.7));
+      animation: flameRainbowAnim 3s linear infinite, flamePulse 1.4s infinite ease-in-out;
+    }
+    .streak-tier-4 .flame-path-base { fill: url(#grad-rainbow-base); }
+    .streak-tier-4 .flame-path-inner { fill: url(#grad-rainbow-inner); }
+    .streak-tier-4 .flame-path-spark { fill: #ffffff; }
+    .streak-tier-4 .streak-days {
+      background: linear-gradient(90deg, #f43f5e, #eab308, #06b6d4, #a855f7, #f43f5e);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shineRainbow 2.5s linear infinite;
+    }
+
+    @keyframes flamePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08) rotate(1deg); }
+    }
+
+    @keyframes flameRainbowAnim {
+      0% { filter: hue-rotate(0deg) drop-shadow(0 0 14px rgba(236, 72, 153, 0.7)); }
+      50% { filter: hue-rotate(180deg) drop-shadow(0 0 14px rgba(6, 182, 212, 0.8)); }
+      100% { filter: hue-rotate(360deg) drop-shadow(0 0 14px rgba(236, 72, 153, 0.7)); }
+    }
+
+    @keyframes shineRainbow {
+      to { background-position: 200% center; }
+    }
+
+    /* Main Navigation Tabs */
+    .nav-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .tab-btn span.tab-badge {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--text-subtle);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-btn.active span.tab-badge {
+      color: var(--accent-primary);
+    }
+
+    /* Routine View Container */
+    .view-panel {
+      display: none;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Day Header Info */
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 18px;
+      padding: 0 4px;
+    }
+
+    .day-title-group h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .day-title-group p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .day-status-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    /* Exercise Card Grid / List */
+    .exercise-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .exercise-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .exercise-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent-primary);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .exercise-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .exercise-card.completed {
+      background: var(--bg-card-done);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .exercise-card.completed::before {
+      opacity: 1;
+      background: var(--accent-secondary);
+    }
+
+    .exercise-card.completed .exercise-name {
+      color: #a7f3d0;
+    }
+
+    /* Vector Icon Column */
+    .icon-box {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #818cf8;
+      padding: 8px;
+      flex-shrink: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .exercise-card.completed .icon-box {
+      color: #34d399;
+      background: rgba(6, 78, 59, 0.4);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .icon-box svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Details Column */
+    .details-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .exercise-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .exercise-notes {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      line-height: 1.25;
+    }
+
+    /* Inputs Row (Reps & Weight) */
+    .inputs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .input-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(10, 15, 29, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px 10px;
+      gap: 6px;
+      transition: var(--transition-smooth);
+    }
+
+    .input-pill:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .input-pill label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+
+    .input-pill input {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.88rem;
+      width: 95px;
+      outline: none;
+    }
+
+    .input-pill.weight-pill input {
+      width: 85px;
+      color: #38bdf8;
+    }
+
+    /* Custom Animated Checkbox */
+    .check-box-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 8px;
+    }
+
+    .custom-check {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(15, 23, 42, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .custom-check:hover {
+      border-color: var(--accent-secondary);
+      transform: scale(1.08);
+    }
+
+    .custom-check svg {
+      width: 20px;
+      height: 20px;
+      stroke: #ffffff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: var(--transition-smooth);
+    }
+
+    .custom-check.checked {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #34d399;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.5);
+    }
+
+    .custom-check.checked svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Bottom Sticky Action Bar */
+    .completion-bar {
+      position: sticky;
+      bottom: 20px;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 22px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 20px;
+      transition: var(--transition-smooth);
+    }
+
+    .progress-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .progress-count {
+      color: #ffffff;
+    }
+
+    .progress-pct {
+      color: var(--text-muted);
+    }
+
+    .progress-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* Complete Button State transition */
+    .btn-complete {
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      border: none;
+      cursor: not-allowed;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      background: #334155;
+      color: #94a3b8;
+      box-shadow: none;
+    }
+
+    .btn-complete.active {
+      cursor: pointer;
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 4px 15px rgba(0, 0, 0, 0.4);
+      animation: pulseButton 1.8s infinite ease-in-out;
+    }
+
+    .btn-complete.active:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.8);
+    }
+
+    @keyframes pulseButton {
+      0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+      50% { box-shadow: 0 0 32px rgba(6, 182, 212, 0.8); }
+    }
+
+    /* Calendar View Styles */
+    .calendar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .cal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .cal-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .cal-nav-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: var(--transition-smooth);
+    }
+
+    .cal-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-subtle);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .cal-day.empty {
+      background: transparent;
+      border: none;
+      cursor: default;
+    }
+
+    .cal-day:not(.empty):hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .cal-day.today {
+      border-color: var(--accent-primary);
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .cal-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 5px;
+      height: 5px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+    }
+
+    /* Logged Workout Day in Calendar */
+    .cal-day.completed-day {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(6, 182, 212, 0.2) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .cal-day-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #10b981;
+      color: #042f2e;
+      margin-top: 2px;
+      line-height: 1.1;
+    }
+
+    .cal-day-badge.d1 { background: #818cf8; color: #1e1b4b; }
+    .cal-day-badge.d2 { background: #38bdf8; color: #082f49; }
+    .cal-day-badge.d3 { background: #f472b6; color: #500724; }
+
+    /* Streak Legend / Explainer Card */
+    .legend-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .legend-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .legend-item {
+      background: rgba(10, 15, 29, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .legend-icon-mini {
+      width: 28px;
+      height: 28px;
+    }
+
+    .legend-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .legend-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast-box.show {
+      transform: translateX(0);
+    }
+
+    /* Confetti canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* Modal for Workout Details */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .reset-day-btn {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .reset-day-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    @media (max-width: 640px) {
+      .exercise-card {
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+      }
+      .icon-box {
+        grid-column: 1 / -1;
+        width: 100%;
+        height: 70px;
+      }
+      .brand-title {
+        font-size: 1.35rem;
+      }
+      .completion-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-complete {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Global Definitions & Gradients for Flame & Icons -->
+  <svg width="0" height="0" style="position:absolute;visibility:hidden;">
+    <defs>
+      <!-- Tier 1: Amarillo/Naranja -->
+      <linearGradient id="grad-orange" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#ea580c"/>
+        <stop offset="60%" stop-color="#f97316"/>
+        <stop offset="100%" stop-color="#facc15"/>
+      </linearGradient>
+      <linearGradient id="grad-yellow" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#f97316"/>
+        <stop offset="100%" stop-color="#fef08a"/>
+      </linearGradient>
+
+      <!-- Tier 2: Cyan/Azul -->
+      <linearGradient id="grad-blue" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#0284c7"/>
+        <stop offset="50%" stop-color="#0ea5e9"/>
+        <stop offset="100%" stop-color="#38bdf8"/>
+      </linearGradient>
+      <linearGradient id="grad-cyan" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#06b6d4"/>
+        <stop offset="100%" stop-color="#a5f3fc"/>
+      </linearGradient>
+
+      <!-- Tier 3: Magenta/Purpura -->
+      <linearGradient id="grad-purple" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#7c3aed"/>
+        <stop offset="50%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="#d946ef"/>
+      </linearGradient>
+      <linearGradient id="grad-magenta" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#c026d3"/>
+        <stop offset="100%" stop-color="#f5d0fe"/>
+      </linearGradient>
+
+      <!-- Tier 4: Arcoiris -->
+      <linearGradient id="grad-rainbow-base" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f43f5e"/>
+        <stop offset="25%" stop-color="#f97316"/>
+        <stop offset="50%" stop-color="#eab308"/>
+        <stop offset="75%" stop-color="#06b6d4"/>
+        <stop offset="100%" stop-color="#8b5cf6"/>
+      </linearGradient>
+      <linearGradient id="grad-rainbow-inner" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#06b6d4"/>
+        <stop offset="50%" stop-color="#f43f5e"/>
+        <stop offset="100%" stop-color="#fef08a"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-section">
+        <h1 class="brand-title">TITANFIT • RUTINA</h1>
+        <p class="brand-subtitle">Plan de 3 Días • Progresión y Racha Semanal</p>
+      </div>
+
+      <!-- Streak Badge with Fire Vector -->
+      <div class="streak-badge streak-tier-0" id="streakBadge" title="Click para ver niveles de racha">
+        <div class="flame-container">
+          <svg class="flame-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Sparks / Embers -->
+            <circle cx="20" cy="18" r="2.5" class="flame-path-spark" />
+            <circle cx="44" cy="22" r="2" class="flame-path-spark" />
+            <circle cx="38" cy="12" r="1.8" class="flame-path-spark" />
+            <!-- Base outer flame -->
+            <path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z" />
+            <!-- Inner core flame -->
+            <path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z" />
+          </svg>
+        </div>
+        <div class="streak-info">
+          <span class="streak-days" id="streakDisplay">0 Días</span>
+          <span class="streak-label" id="streakTierLabel">Racha Semanal</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('dia1')">
+        Día 1
+        <span class="tab-badge">Piernas</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dia2')">
+        Día 2
+        <span class="tab-badge">Tren Superior</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dia3')">
+        Día 3
+        <span class="tab-badge">Glúteos & Pierna</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('calendar')">
+        Calendario
+        <span class="tab-badge">Historial</span>
+      </button>
+    </nav>
+
+    <!-- Vista dia1 -->
+    <section id="view_dia1" class="view-panel active">
+      <div class="day-header">
+        <div class="day-title-group">
+          <h2>Día 1: Piernas y Tren Inferior</h2>
+          <p>Marca cada ejercicio completado y registra las cargas utilizadas.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="reset-day-btn" onclick="resetDayProgress('dia1')" title="Desmarca los casilleros de hoy para repetir la rutina sin borrar pesos">Desmarcar día</button>
+          <span class="day-status-pill">Fuerza Pierna</span>
+        </div>
+      </div>
+
+      <div class="exercise-list">
+    
+        <!-- Exercise: Bicicleta o caminata -->
+        <div class="exercise-card" id="card_d1_e1" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <circle cx="18" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="46" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="32" cy="44" r="3" fill="currentColor"/>
+  <path d="M18 44L28 26H38L46 44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 26L32 44L24 18H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 26L42 16H48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="27" cy="12" r="3" fill="currentColor"/>
+  <path d="M27 15L32 24L38 34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Bicicleta o caminata</div>
+            <div class="exercise-notes">Calentamiento aeróbico suave a moderado</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e1" value="10 min" onchange="saveExerciseData('d1_e1')" placeholder="10 min" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e1" value="N/A" onchange="saveExerciseData('d1_e1')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e1" onclick="toggleCheck('dia1', 'd1_e1')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Prensa de piernas -->
+        <div class="exercise-card" id="card_d1_e2" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Incline frame -->
+  <path d="M8 54H56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M12 54L38 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sled / Plate -->
+  <rect x="30" y="16" width="16" height="6" rx="2" transform="rotate(-30 30 16)" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="2"/>
+  <!-- User seated on back pad -->
+  <path d="M16 48L24 38L30 42" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bent legs pressing against plate -->
+  <path d="M24 38L34 32L40 22" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="34" r="3.5" fill="currentColor"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Prensa de piernas</div>
+            <div class="exercise-notes">Empuje firme con talones, sin bloquear rodillas</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e2" value="3 × 12" onchange="saveExerciseData('d1_e2')" placeholder="3 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e2" value="60 kg" onchange="saveExerciseData('d1_e2')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e2" onclick="toggleCheck('dia1', 'd1_e2')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Curl femoral -->
+        <div class="exercise-card" id="card_d1_e3" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Bench frame -->
+  <path d="M10 52H54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M16 52V38H44V52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M14 38H46" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Person lying face down / curling legs -->
+  <circle cx="16" cy="32" r="3.5" fill="currentColor"/>
+  <path d="M20 36H38L48 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Lever / Roller -->
+  <circle cx="48" cy="24" r="3" fill="currentColor" opacity="0.4" stroke="currentColor" stroke-width="2"/>
+  <path d="M42 38L48 24" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Curl femoral</div>
+            <div class="exercise-notes">Control en la fase excéntrica al bajar</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e3" value="4 × 12" onchange="saveExerciseData('d1_e3')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e3" value="30 kg" onchange="saveExerciseData('d1_e3')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e3" onclick="toggleCheck('dia1', 'd1_e3')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Extensión de cuádriceps -->
+        <div class="exercise-card" id="card_d1_e4" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Chair / Bench -->
+  <path d="M12 54H52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 54V28L28 28V42H42V54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Person seated -->
+  <circle cx="22" cy="22" r="3.5" fill="currentColor"/>
+  <path d="M24 28V40L38 40L48 30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Pad pushing up -->
+  <circle cx="48" cy="30" r="3.5" fill="currentColor" opacity="0.4" stroke="currentColor" stroke-width="2"/>
+  <path d="M38 40L44 48" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Extensión de cuádriceps</div>
+            <div class="exercise-notes">Pausa de 1 seg arriba en máxima contracción</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e4" value="4 × 12" onchange="saveExerciseData('d1_e4')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e4" value="35 kg" onchange="saveExerciseData('d1_e4')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e4" onclick="toggleCheck('dia1', 'd1_e4')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Abductores en polea -->
+        <div class="exercise-card" id="card_d1_e5" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Cable tower column -->
+  <rect x="12" y="10" width="6" height="44" rx="1.5" stroke="currentColor" stroke-width="2"/>
+  <circle cx="15" cy="46" r="2.5" fill="currentColor"/>
+  <!-- Cable to ankle -->
+  <path d="M15 46H28" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <!-- Person standing upright, one leg abducting out -->
+  <circle cx="34" cy="16" r="3.5" fill="currentColor"/>
+  <path d="M34 20V34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 26L20 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <!-- Standing leg -->
+  <path d="M34 34L33 54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Abducting leg extended outward -->
+  <path d="M34 34L46 48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="46" cy="48" r="2" fill="currentColor"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Abductores en polea</div>
+            <div class="exercise-notes">Cuerpo recto, apertura controlada de cadera</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e5" value="4 × 12" onchange="saveExerciseData('d1_e5')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e5" value="15 kg" onchange="saveExerciseData('d1_e5')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e5" onclick="toggleCheck('dia1', 'd1_e5')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Gemelos en máquina -->
+        <div class="exercise-card" id="card_d1_e6" data-day="dia1">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Platform block & shoulder pads -->
+  <path d="M14 54H50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="30" y="50" width="18" height="4" rx="1" fill="currentColor" opacity="0.4"/>
+  <!-- Vertical frame / weight column -->
+  <path d="M18 54V14H24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Shoulder pads -->
+  <rect x="22" y="18" width="14" height="4" rx="2" fill="currentColor"/>
+  <!-- Person standing tiptoe -->
+  <circle cx="30" cy="14" r="3" fill="currentColor"/>
+  <path d="M30 22V36L34 50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 50L38 46" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M40 38L44 42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Gemelos en máquina</div>
+            <div class="exercise-notes">Rango completo: elongación profunda y subida en puntas</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d1_e6" value="4 × 12" onchange="saveExerciseData('d1_e6')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d1_e6" value="40 kg" onchange="saveExerciseData('d1_e6')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d1_e6" onclick="toggleCheck('dia1', 'd1_e6')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Barra de completado flotante para este día -->
+      <div class="completion-bar">
+        <div class="progress-info">
+          <div class="progress-labels">
+            <span class="progress-count" id="count_dia1">0 de 6 completados</span>
+            <span class="progress-pct" id="pct_dia1">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar_dia1"></div>
+          </div>
+        </div>
+        <button class="btn-complete" id="btn_dia1" onclick="finishWorkout('dia1')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="btn_text_dia1">Completa todos los ejercicios</span>
+        </button>
+      </div>
+    </section>
+    
+    <!-- Vista dia2 -->
+    <section id="view_dia2" class="view-panel">
+      <div class="day-header">
+        <div class="day-title-group">
+          <h2>Día 2: Torso y Brazos (Empuje & Tirón)</h2>
+          <p>Marca cada ejercicio completado y registra las cargas utilizadas.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="reset-day-btn" onclick="resetDayProgress('dia2')" title="Desmarca los casilleros de hoy para repetir la rutina sin borrar pesos">Desmarcar día</button>
+          <span class="day-status-pill">Tren Superior</span>
+        </div>
+      </div>
+
+      <div class="exercise-list">
+    
+        <!-- Exercise: Caminata / Bicicleta -->
+        <div class="exercise-card" id="card_d2_e1" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <circle cx="18" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="46" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="32" cy="44" r="3" fill="currentColor"/>
+  <path d="M18 44L28 26H38L46 44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 26L32 44L24 18H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 26L42 16H48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="27" cy="12" r="3" fill="currentColor"/>
+  <path d="M27 15L32 24L38 34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Caminata / Bicicleta</div>
+            <div class="exercise-notes">Calentamiento y activación articular previa</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e1" value="5–8 min" onchange="saveExerciseData('d2_e1')" placeholder="5–8 min" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e1" value="N/A" onchange="saveExerciseData('d2_e1')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e1" onclick="toggleCheck('dia2', 'd2_e1')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Remo sentado en máquina o polea -->
+        <div class="exercise-card" id="card_d2_e2" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Machine bench & cable -->
+  <path d="M8 50H56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M16 50V40H36V50" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M48 50V28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="48" cy="34" r="2" fill="currentColor"/>
+  <!-- Person sitting and pulling cable handle -->
+  <circle cx="22" cy="24" r="3.5" fill="currentColor"/>
+  <path d="M22 28L24 40L36 40L42 34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Arm pulling back -->
+  <path d="M24 30L34 32L46 34" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Remo sentado en máquina o polea</div>
+            <div class="exercise-notes">Tracción hacia el ombligo retrayendo escápulas</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e2" value="4 × 12" onchange="saveExerciseData('d2_e2')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e2" value="35 kg" onchange="saveExerciseData('d2_e2')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e2" onclick="toggleCheck('dia2', 'd2_e2')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Jalón al pecho -->
+        <div class="exercise-card" id="card_d2_e3" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Overhead bar & machine top -->
+  <path d="M14 12H50" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 12V22" stroke="currentColor" stroke-width="2"/>
+  <path d="M20 22H44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Seat -->
+  <path d="M24 52H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M32 52V42" stroke="currentColor" stroke-width="2.5"/>
+  <rect x="26" y="40" width="12" height="3" rx="1" fill="currentColor"/>
+  <!-- Person sitting with arms up/pulling -->
+  <circle cx="32" cy="30" r="3.5" fill="currentColor"/>
+  <path d="M32 34V44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arms pulling from bar -->
+  <path d="M22 22L28 28L32 34L36 28L42 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Jalón al pecho</div>
+            <div class="exercise-notes">Agarre prono amplio, llevar barra a parte alta del pecho</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e3" value="4 × 12" onchange="saveExerciseData('d2_e3')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e3" value="40 kg" onchange="saveExerciseData('d2_e3')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e3" onclick="toggleCheck('dia2', 'd2_e3')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Press de pecho en máquina -->
+        <div class="exercise-card" id="card_d2_e4" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Seat & backrest -->
+  <path d="M12 52H52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M20 52V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M20 42H34V52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Person seated pushing forward -->
+  <circle cx="25" cy="22" r="3.5" fill="currentColor"/>
+  <path d="M24 26V42L34 42L36 52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arm pushing machine handles -->
+  <path d="M25 28L35 30L45 28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Machine handle lever -->
+  <path d="M45 18V38" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Press de pecho en máquina</div>
+            <div class="exercise-notes">Pecho erguido, empuje controlado sin hiperflexión</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e4" value="4 × 10" onchange="saveExerciseData('d2_e4')" placeholder="4 × 10" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e4" value="35 kg" onchange="saveExerciseData('d2_e4')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e4" onclick="toggleCheck('dia2', 'd2_e4')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Curl de bíceps -->
+        <div class="exercise-card" id="card_d2_e5" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Figure upper body -->
+  <circle cx="26" cy="16" r="4" fill="currentColor"/>
+  <path d="M26 21V44" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Legs -->
+  <path d="M26 44L20 56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M26 44L32 56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arm curled holding dumbbell -->
+  <path d="M26 24L32 34L38 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dumbbell weights -->
+  <rect x="34" y="20" width="8" height="4" rx="1" fill="currentColor"/>
+  <line x1="38" y1="18" x2="38" y2="26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Curl de bíceps</div>
+            <div class="exercise-notes">Codos pegados a los costados, sin balanceo</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e5" value="4 × 12" onchange="saveExerciseData('d2_e5')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e5" value="10 kg" onchange="saveExerciseData('d2_e5')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e5" onclick="toggleCheck('dia2', 'd2_e5')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Tríceps en polea -->
+        <div class="exercise-card" id="card_d2_e6" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Top pulley -->
+  <circle cx="40" cy="12" r="4" stroke="currentColor" stroke-width="2.5"/>
+  <path d="M40 12V24" stroke="currentColor" stroke-width="2"/>
+  <!-- Figure standing -->
+  <circle cx="24" cy="18" r="3.5" fill="currentColor"/>
+  <path d="M24 22V40L22 54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M24 40L28 54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arm bending down at elbow pushing down -->
+  <path d="M25 24L34 26L38 38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Rope / attachment -->
+  <path d="M35 39H43" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Tríceps en polea</div>
+            <div class="exercise-notes">Extensión completa de codos manteniendo postura fija</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e6" value="4 × 12" onchange="saveExerciseData('d2_e6')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e6" value="20 kg" onchange="saveExerciseData('d2_e6')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e6" onclick="toggleCheck('dia2', 'd2_e6')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Elevaciones laterales sentada -->
+        <div class="exercise-card" id="card_d2_e7" data-day="dia2">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Bench -->
+  <path d="M20 54H44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M32 54V40" stroke="currentColor" stroke-width="2.5"/>
+  <rect x="26" y="38" width="12" height="3" rx="1.5" fill="currentColor"/>
+  <!-- Seated figure with arms raised to sides -->
+  <circle cx="32" cy="20" r="3.5" fill="currentColor"/>
+  <path d="M32 24V40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Left & right raised arms -->
+  <path d="M12 26L22 25L32 26L42 25L52 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dumbbells in hands -->
+  <rect x="9" y="24" width="4" height="5" rx="1" fill="currentColor"/>
+  <rect x="51" y="24" width="4" height="5" rx="1" fill="currentColor"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Elevaciones laterales sentada</div>
+            <div class="exercise-notes">Sentada para aislar hombros, codos ligeramente flexionados</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d2_e7" value="4 × 12" onchange="saveExerciseData('d2_e7')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d2_e7" value="6 kg" onchange="saveExerciseData('d2_e7')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d2_e7" onclick="toggleCheck('dia2', 'd2_e7')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Barra de completado flotante para este día -->
+      <div class="completion-bar">
+        <div class="progress-info">
+          <div class="progress-labels">
+            <span class="progress-count" id="count_dia2">0 de 7 completados</span>
+            <span class="progress-pct" id="pct_dia2">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar_dia2"></div>
+          </div>
+        </div>
+        <button class="btn-complete" id="btn_dia2" onclick="finishWorkout('dia2')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="btn_text_dia2">Completa todos los ejercicios</span>
+        </button>
+      </div>
+    </section>
+    
+    <!-- Vista dia3 -->
+    <section id="view_dia3" class="view-panel">
+      <div class="day-header">
+        <div class="day-title-group">
+          <h2>Día 3: Glúteos y Piernas Enfoque</h2>
+          <p>Marca cada ejercicio completado y registra las cargas utilizadas.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="reset-day-btn" onclick="resetDayProgress('dia3')" title="Desmarca los casilleros de hoy para repetir la rutina sin borrar pesos">Desmarcar día</button>
+          <span class="day-status-pill">Glúteos & Piernas</span>
+        </div>
+      </div>
+
+      <div class="exercise-list">
+    
+        <!-- Exercise: Bicicleta -->
+        <div class="exercise-card" id="card_d3_e1" data-day="dia3">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <circle cx="18" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="46" cy="44" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="32" cy="44" r="3" fill="currentColor"/>
+  <path d="M18 44L28 26H38L46 44" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 26L32 44L24 18H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 26L42 16H48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="27" cy="12" r="3" fill="currentColor"/>
+  <path d="M27 15L32 24L38 34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Bicicleta</div>
+            <div class="exercise-notes">Cadencia constante de calentamiento</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d3_e1" value="10 min" onchange="saveExerciseData('d3_e1')" placeholder="10 min" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d3_e1" value="N/A" onchange="saveExerciseData('d3_e1')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d3_e1" onclick="toggleCheck('dia3', 'd3_e1')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Patada de glúteo en cuadrupedia -->
+        <div class="exercise-card" id="card_d3_e2" data-day="dia3">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Floor line -->
+  <path d="M8 50H56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Person on hands and knees (quadrupedia) -->
+  <circle cx="16" cy="28" r="3.5" fill="currentColor"/>
+  <!-- Torso horizontal -->
+  <path d="M18 32L36 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Arms down to floor -->
+  <path d="M20 32V50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Front knee on floor -->
+  <path d="M34 32L34 42L28 50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Glute kickback leg raised 90deg upward -->
+  <path d="M36 32L46 32L48 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="48" cy="20" r="2" fill="currentColor"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Patada de glúteo en cuadrupedia</div>
+            <div class="exercise-notes">Columna neutra, apretar glúteo arriba sin quebrar lumbares</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d3_e2" value="4 × 10-12 por lado" onchange="saveExerciseData('d3_e2')" placeholder="4 × 10-12 por lado" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d3_e2" value="Tobilleras 4kg" onchange="saveExerciseData('d3_e2')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d3_e2" onclick="toggleCheck('dia3', 'd3_e2')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Extensión de cuádriceps -->
+        <div class="exercise-card" id="card_d3_e3" data-day="dia3">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Chair / Bench -->
+  <path d="M12 54H52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 54V28L28 28V42H42V54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Person seated -->
+  <circle cx="22" cy="22" r="3.5" fill="currentColor"/>
+  <path d="M24 28V40L38 40L48 30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Pad pushing up -->
+  <circle cx="48" cy="30" r="3.5" fill="currentColor" opacity="0.4" stroke="currentColor" stroke-width="2"/>
+  <path d="M38 40L44 48" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Extensión de cuádriceps</div>
+            <div class="exercise-notes">Movimiento controlado para bombear cuádriceps</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d3_e3" value="4 × 12" onchange="saveExerciseData('d3_e3')" placeholder="4 × 12" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d3_e3" value="35 kg" onchange="saveExerciseData('d3_e3')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d3_e3" onclick="toggleCheck('dia3', 'd3_e3')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Patada de glúteo en polea -->
+        <div class="exercise-card" id="card_d3_e4" data-day="dia3">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Cable tower column on left -->
+  <rect x="8" y="10" width="5" height="44" rx="1.5" stroke="currentColor" stroke-width="2"/>
+  <circle cx="10.5" cy="46" r="2" fill="currentColor"/>
+  <!-- Hands holding tower for support -->
+  <path d="M22 28L13 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <!-- Person leaning slightly, standing on one leg -->
+  <circle cx="25" cy="18" r="3.5" fill="currentColor"/>
+  <path d="M25 22L28 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Standing leg -->
+  <path d="M28 36L26 54" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Kickback leg extended backward with cable attached -->
+  <path d="M28 36L44 46" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Cable line from low pulley to ankle -->
+  <path d="M10.5 46H38L44 46" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Patada de glúteo en polea</div>
+            <div class="exercise-notes">Si tenés polea, usar agarre de tobillo y patear en diagonal atrás</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d3_e4" value="4 × 10-12 por lado" onchange="saveExerciseData('d3_e4')" placeholder="4 × 10-12 por lado" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d3_e4" value="12 kg" onchange="saveExerciseData('d3_e4')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d3_e4" onclick="toggleCheck('dia3', 'd3_e4')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exercise: Gemelos -->
+        <div class="exercise-card" id="card_d3_e5" data-day="dia3">
+          <div class="icon-box">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="ex-icon">
+  <!-- Platform block & shoulder pads -->
+  <path d="M14 54H50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="30" y="50" width="18" height="4" rx="1" fill="currentColor" opacity="0.4"/>
+  <!-- Vertical frame / weight column -->
+  <path d="M18 54V14H24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Shoulder pads -->
+  <rect x="22" y="18" width="14" height="4" rx="2" fill="currentColor"/>
+  <!-- Person standing tiptoe -->
+  <circle cx="30" cy="14" r="3" fill="currentColor"/>
+  <path d="M30 22V36L34 50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 50L38 46" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M40 38L44 42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+          </div>
+          <div class="details-box">
+            <div class="exercise-name">Gemelos</div>
+            <div class="exercise-notes">Sentada o parada, énfasis en aguantar 1 seg en la cima</div>
+            <div class="inputs-row">
+              <div class="input-pill" title="Series y Repeticiones (editable)">
+                <label>Reps:</label>
+                <input type="text" id="reps_d3_e5" value="4 × 12-15" onchange="saveExerciseData('d3_e5')" placeholder="4 × 12-15" />
+              </div>
+              <div class="input-pill weight-pill" title="Peso utilizado">
+                <label>Peso:</label>
+                <input type="text" id="weight_d3_e5" value="35 kg" onchange="saveExerciseData('d3_e5')" placeholder="ej. 45 kg" />
+              </div>
+            </div>
+          </div>
+          <div class="check-box-wrapper">
+            <div class="custom-check" id="check_d3_e5" onclick="toggleCheck('dia3', 'd3_e5')" title="Marcar como realizado">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Barra de completado flotante para este día -->
+      <div class="completion-bar">
+        <div class="progress-info">
+          <div class="progress-labels">
+            <span class="progress-count" id="count_dia3">0 de 5 completados</span>
+            <span class="progress-pct" id="pct_dia3">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar_dia3"></div>
+          </div>
+        </div>
+        <button class="btn-complete" id="btn_dia3" onclick="finishWorkout('dia3')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="btn_text_dia3">Completa todos los ejercicios</span>
+        </button>
+      </div>
+    </section>
+    
+    <!-- Vista Calendario & Historial -->
+    <section id="view_calendar" class="view-panel">
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <div class="cal-title" id="calMonthYear">Septiembre 2026</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
+            <button class="cal-nav-btn" onclick="nextMonth()">›</button>
+          </div>
+        </div>
+
+        <div class="calendar-weekdays">
+          <div>Lun</div>
+          <div>Mar</div>
+          <div>Mié</div>
+          <div>Jue</div>
+          <div>Vie</div>
+          <div>Sáb</div>
+          <div>Dom</div>
+        </div>
+
+        <div class="calendar-grid" id="calendarDays">
+          <!-- Generado dinámicamente por JS -->
+        </div>
+      </div>
+
+      <!-- Explicación del sistema de racha / Leyenda -->
+      <div class="legend-card">
+        <div class="legend-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M12 2c0 0-4 4-4 8a4 4 0 0 0 8 0c0-4-4-8-4-8z"/></svg>
+          Niveles de Fuego y Racha Semanal
+        </div>
+        <div class="legend-grid">
+          <div class="legend-item" style="border-color: rgba(148, 163, 184, 0.3);">
+            <div class="legend-icon-mini streak-tier-0">
+              <svg viewBox="0 0 64 64" class="flame-svg"><path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z"/><path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z"/></svg>
+            </div>
+            <span class="legend-name" style="color:#94a3b8">0 Días</span>
+            <span class="legend-desc">Fuego Gris</span>
+          </div>
+
+          <div class="legend-item" style="border-color: rgba(251, 146, 60, 0.3);">
+            <div class="legend-icon-mini streak-tier-1">
+              <svg viewBox="0 0 64 64" class="flame-svg"><path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z"/><path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z"/></svg>
+            </div>
+            <span class="legend-name" style="color:#fb923c">1 Día</span>
+            <span class="legend-desc">Amarillo / Naranja</span>
+          </div>
+
+          <div class="legend-item" style="border-color: rgba(56, 189, 248, 0.3);">
+            <div class="legend-icon-mini streak-tier-2">
+              <svg viewBox="0 0 64 64" class="flame-svg"><path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z"/><path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z"/></svg>
+            </div>
+            <span class="legend-name" style="color:#38bdf8">2 Días</span>
+            <span class="legend-desc">Cyan / Azul</span>
+          </div>
+
+          <div class="legend-item" style="border-color: rgba(232, 121, 249, 0.3);">
+            <div class="legend-icon-mini streak-tier-3">
+              <svg viewBox="0 0 64 64" class="flame-svg"><path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z"/><path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z"/></svg>
+            </div>
+            <span class="legend-name" style="color:#e879f9">3 Días</span>
+            <span class="legend-desc">Magenta / Púrpura</span>
+          </div>
+
+          <div class="legend-item" style="border-color: rgba(244, 63, 94, 0.4);">
+            <div class="legend-icon-mini streak-tier-4">
+              <svg viewBox="0 0 64 64" class="flame-svg"><path class="flame-path-base" d="M32 4C32 4 37 14 34 22C38 18 43 20 44 26C47 22 51 25 51 32C52 44.1 43 56 32 56C21 56 12 44.1 13 32C13 24 18 19 22 17C21 23 26 27 28 27C30 20 32 4 32 4Z"/><path class="flame-path-inner" d="M32 24C32 24 36 29 35 34C37 32 40 34 40 38C40 44.6 36.4 50 32 50C27.6 50 24 44.6 24 38C24 33.5 27 30 29 29C29 32 31 34 32 34C32 30 32 24 32 24Z"/></svg>
+            </div>
+            <span class="legend-name" style="color:#f43f5e">4+ Días</span>
+            <span class="legend-desc">Arcoíris Cósmico</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal Detalle Día -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal-content" id="modalContent">
+      <div class="modal-header">
+        <h3 id="modalDateTitle" style="color:#fff; font-weight:800;">Detalles del Entrenamiento</h3>
+        <button class="modal-close" onclick="closeModalDirect()">×</button>
+      </div>
+      <div id="modalBody" style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificación -->
+  <div class="toast-box" id="toastBox">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span id="toastMessage">¡Día completado con éxito!</span>
+  </div>
+
+  <!-- Application Logic JS (PURE JAVASCRIPT - NO ESCAPING ISSUES) -->
+  <script>
+    const ROUTINE_DATA = [{"id": "dia1", "title": "Día 1: Piernas y Tren Inferior", "badge": "Fuerza Pierna", "exercises": [{"id": "d1_e1", "name": "Bicicleta o caminata", "default_reps": "10 min", "default_weight": "N/A", "icon": "bike", "notes": "Calentamiento aeróbico suave a moderado"}, {"id": "d1_e2", "name": "Prensa de piernas", "default_reps": "3 × 12", "default_weight": "60 kg", "icon": "leg_press", "notes": "Empuje firme con talones, sin bloquear rodillas"}, {"id": "d1_e3", "name": "Curl femoral", "default_reps": "4 × 12", "default_weight": "30 kg", "icon": "leg_curl", "notes": "Control en la fase excéntrica al bajar"}, {"id": "d1_e4", "name": "Extensión de cuádriceps", "default_reps": "4 × 12", "default_weight": "35 kg", "icon": "leg_extension", "notes": "Pausa de 1 seg arriba en máxima contracción"}, {"id": "d1_e5", "name": "Abductores en polea", "default_reps": "4 × 12", "default_weight": "15 kg", "icon": "cable_abductor", "notes": "Cuerpo recto, apertura controlada de cadera"}, {"id": "d1_e6", "name": "Gemelos en máquina", "default_reps": "4 × 12", "default_weight": "40 kg", "icon": "calf_machine", "notes": "Rango completo: elongación profunda y subida en puntas"}]}, {"id": "dia2", "title": "Día 2: Torso y Brazos (Empuje & Tirón)", "badge": "Tren Superior", "exercises": [{"id": "d2_e1", "name": "Caminata / Bicicleta", "default_reps": "5–8 min", "default_weight": "N/A", "icon": "bike", "notes": "Calentamiento y activación articular previa"}, {"id": "d2_e2", "name": "Remo sentado en máquina o polea", "default_reps": "4 × 12", "default_weight": "35 kg", "icon": "seated_row", "notes": "Tracción hacia el ombligo retrayendo escápulas"}, {"id": "d2_e3", "name": "Jalón al pecho", "default_reps": "4 × 12", "default_weight": "40 kg", "icon": "lat_pulldown", "notes": "Agarre prono amplio, llevar barra a parte alta del pecho"}, {"id": "d2_e4", "name": "Press de pecho en máquina", "default_reps": "4 × 10", "default_weight": "35 kg", "icon": "chest_press", "notes": "Pecho erguido, empuje controlado sin hiperflexión"}, {"id": "d2_e5", "name": "Curl de bíceps", "default_reps": "4 × 12", "default_weight": "10 kg", "icon": "bicep_curl", "notes": "Codos pegados a los costados, sin balanceo"}, {"id": "d2_e6", "name": "Tríceps en polea", "default_reps": "4 × 12", "default_weight": "20 kg", "icon": "tricep_pushdown", "notes": "Extensión completa de codos manteniendo postura fija"}, {"id": "d2_e7", "name": "Elevaciones laterales sentada", "default_reps": "4 × 12", "default_weight": "6 kg", "icon": "lateral_raises", "notes": "Sentada para aislar hombros, codos ligeramente flexionados"}]}, {"id": "dia3", "title": "Día 3: Glúteos y Piernas Enfoque", "badge": "Glúteos & Piernas", "exercises": [{"id": "d3_e1", "name": "Bicicleta", "default_reps": "10 min", "default_weight": "N/A", "icon": "bike", "notes": "Cadencia constante de calentamiento"}, {"id": "d3_e2", "name": "Patada de glúteo en cuadrupedia", "default_reps": "4 × 10-12 por lado", "default_weight": "Tobilleras 4kg", "icon": "glute_quadruped", "notes": "Columna neutra, apretar glúteo arriba sin quebrar lumbares"}, {"id": "d3_e3", "name": "Extensión de cuádriceps", "default_reps": "4 × 12", "default_weight": "35 kg", "icon": "leg_extension", "notes": "Movimiento controlado para bombear cuádriceps"}, {"id": "d3_e4", "name": "Patada de glúteo en polea", "default_reps": "4 × 10-12 por lado", "default_weight": "12 kg", "icon": "glute_cable", "notes": "Si tenés polea, usar agarre de tobillo y patear en diagonal atrás"}, {"id": "d3_e5", "name": "Gemelos", "default_reps": "4 × 12-15", "default_weight": "35 kg", "icon": "calf_machine", "notes": "Sentada o parada, énfasis en aguantar 1 seg en la cima"}]}];
+
+    // State Variables
+    let currentTab = 'dia1';
+    let calDate = new Date(); // Viewing month
+    
+    // LocalStorage Keys
+    const STORAGE_PREFIX = 'titanfit_';
+    const KEY_HISTORY = STORAGE_PREFIX + 'history';
+    const KEY_EXERCISE_DATA = STORAGE_PREFIX + 'ex_data';
+    const KEY_CHECKED = STORAGE_PREFIX + 'checked';
+
+    // Init App
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSavedData();
+      updateAllDaysProgress();
+      renderCalendar();
+      updateStreak();
+    });
+
+    // Navigation Tab Switching
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => {
+        const attr = btn.getAttribute('onclick');
+        return attr && attr.indexOf(tabId) !== -1;
+      });
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const targetView = document.getElementById('view_' + tabId);
+      if (targetView) targetView.classList.add('active');
+
+      if (tabId === 'calendar') {
+        renderCalendar();
+      }
+    }
+
+    // Load Data from LocalStorage
+    function loadSavedData() {
+      // 1. Saved Inputs (Weights & Reps)
+      const savedExData = JSON.parse(localStorage.getItem(KEY_EXERCISE_DATA) || '{}');
+      for (const exId in savedExData) {
+        const repsInput = document.getElementById('reps_' + exId);
+        const weightInput = document.getElementById('weight_' + exId);
+        if (repsInput && savedExData[exId].reps) repsInput.value = savedExData[exId].reps;
+        if (weightInput && savedExData[exId].weight) weightInput.value = savedExData[exId].weight;
+      }
+
+      // 2. Saved Checkbox states
+      const savedChecked = JSON.parse(localStorage.getItem(KEY_CHECKED) || '{}');
+      for (const exId in savedChecked) {
+        if (savedChecked[exId]) {
+          const card = document.getElementById('card_' + exId);
+          const checkEl = document.getElementById('check_' + exId);
+          if (card) card.classList.add('completed');
+          if (checkEl) checkEl.classList.add('checked');
+        }
+      }
+    }
+
+    // Save single exercise weight / reps
+    function saveExerciseData(exId) {
+      const savedExData = JSON.parse(localStorage.getItem(KEY_EXERCISE_DATA) || '{}');
+      const repsInput = document.getElementById('reps_' + exId);
+      const weightInput = document.getElementById('weight_' + exId);
+      const repsVal = repsInput ? repsInput.value : '';
+      const weightVal = weightInput ? weightInput.value : '';
+
+      savedExData[exId] = { reps: repsVal, weight: weightVal };
+      localStorage.setItem(KEY_EXERCISE_DATA, JSON.stringify(savedExData));
+      showToast('Guardado: ' + weightVal + ' | ' + repsVal);
+    }
+
+    // Toggle Checkbox
+    function toggleCheck(dayId, exId) {
+      const card = document.getElementById('card_' + exId);
+      const checkEl = document.getElementById('check_' + exId);
+      const isCurrentlyChecked = checkEl.classList.contains('checked');
+
+      if (isCurrentlyChecked) {
+        checkEl.classList.remove('checked');
+        card.classList.remove('completed');
+      } else {
+        checkEl.classList.add('checked');
+        card.classList.add('completed');
+      }
+
+      // Save state
+      const savedChecked = JSON.parse(localStorage.getItem(KEY_CHECKED) || '{}');
+      savedChecked[exId] = !isCurrentlyChecked;
+      localStorage.setItem(KEY_CHECKED, JSON.stringify(savedChecked));
+
+      updateDayProgress(dayId);
+    }
+
+    // Update Progress and Button State for a given day
+    function updateDayProgress(dayId) {
+      const dayConfig = ROUTINE_DATA.find(d => d.id === dayId);
+      if (!dayConfig) return;
+
+      const total = dayConfig.exercises.length;
+      let completedCount = 0;
+
+      dayConfig.exercises.forEach(ex => {
+        const checkEl = document.getElementById('check_' + ex.id);
+        if (checkEl && checkEl.classList.contains('checked')) {
+          completedCount++;
+        }
+      });
+
+      const pct = Math.round((completedCount / total) * 100);
+
+      // DOM updates
+      const countEl = document.getElementById('count_' + dayId);
+      const pctEl = document.getElementById('pct_' + dayId);
+      const barEl = document.getElementById('bar_' + dayId);
+      const btnEl = document.getElementById('btn_' + dayId);
+      const btnTextEl = document.getElementById('btn_text_' + dayId);
+
+      if (countEl) countEl.innerText = completedCount + ' de ' + total + ' completados';
+      if (pctEl) pctEl.innerText = pct + '%';
+      if (barEl) barEl.style.width = pct + '%';
+
+      if (completedCount === total && total > 0) {
+        btnEl.classList.add('active');
+        btnTextEl.innerText = '¡Finalizar y Marcar Día!';
+      } else {
+        btnEl.classList.remove('active');
+        btnTextEl.innerText = 'Completa todos (' + completedCount + '/' + total + ')';
+      }
+    }
+
+    function updateAllDaysProgress() {
+      ROUTINE_DATA.forEach(d => updateDayProgress(d.id));
+    }
+
+    // Reset checkboxes for today
+    function resetDayProgress(dayId) {
+      if (!confirm('¿Deseas desmarcar los ejercicios de este día? Tus pesos y repeticiones se conservarán intactos.')) return;
+      
+      const dayConfig = ROUTINE_DATA.find(d => d.id === dayId);
+      if (!dayConfig) return;
+
+      const savedChecked = JSON.parse(localStorage.getItem(KEY_CHECKED) || '{}');
+      dayConfig.exercises.forEach(ex => {
+        savedChecked[ex.id] = false;
+        const card = document.getElementById('card_' + ex.id);
+        const checkEl = document.getElementById('check_' + ex.id);
+        if (card) card.classList.remove('completed');
+        if (checkEl) checkEl.classList.remove('checked');
+      });
+
+      localStorage.setItem(KEY_CHECKED, JSON.stringify(savedChecked));
+      updateDayProgress(dayId);
+      showToast('Casillas desmarcadas');
+    }
+
+    // Finish Workout & Log into Calendar
+    function finishWorkout(dayId) {
+      const btnEl = document.getElementById('btn_' + dayId);
+      if (!btnEl.classList.contains('active')) {
+        showToast('Aún quedan ejercicios pendientes');
+        return;
+      }
+
+      const dayConfig = ROUTINE_DATA.find(d => d.id === dayId);
+      const todayStr = getTodayISOString();
+
+      // Gather current snapshot of weights and reps
+      const snapshot = {};
+      dayConfig.exercises.forEach(ex => {
+        const repsEl = document.getElementById('reps_' + ex.id);
+        const weightEl = document.getElementById('weight_' + ex.id);
+        snapshot[ex.id] = {
+          name: ex.name,
+          reps: repsEl ? repsEl.value : ex.default_reps,
+          weight: weightEl ? weightEl.value : ex.default_weight
+        };
+      });
+
+      // Save to History in LocalStorage
+      let history = JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]');
+      
+      // Filter out if already registered today to update with latest snapshot
+      history = history.filter(item => item.date !== todayStr);
+      history.push({
+        date: todayStr,
+        dayId: dayId,
+        dayTitle: dayConfig.title,
+        timestamp: new Date().toISOString(),
+        exercises: snapshot
+      });
+
+      localStorage.setItem(KEY_HISTORY, JSON.stringify(history));
+
+      // Trigger Celebration
+      triggerConfetti();
+      showToast('¡Excelente trabajo! ' + dayConfig.badge + ' registrado en el calendario.');
+
+      // Update Racha & Calendar
+      updateStreak();
+      renderCalendar();
+
+      setTimeout(() => {
+        switchTab('calendar');
+      }, 1400);
+    }
+
+    // Helper: Today YYYY-MM-DD
+    function getTodayISOString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + d;
+    }
+
+    // Streak Calculation & Fire Vector States
+    function updateStreak() {
+      const history = JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]');
+      
+      const now = new Date();
+      const currentDayOfWeek = (now.getDay() + 6) % 7; // 0=Lun, 6=Dom
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - currentDayOfWeek);
+      monday.setHours(0, 0, 0, 0);
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      const workoutsThisWeek = history.filter(item => {
+        const itemDate = new Date(item.date + 'T12:00:00');
+        return itemDate >= monday && itemDate <= sunday;
+      });
+
+      const uniqueDates = [];
+      workoutsThisWeek.forEach(w => {
+        if (uniqueDates.indexOf(w.date) === -1) uniqueDates.push(w.date);
+      });
+      const uniqueDaysCount = uniqueDates.length;
+
+      const streakBadge = document.getElementById('streakBadge');
+      const streakDisplay = document.getElementById('streakDisplay');
+      const streakTierLabel = document.getElementById('streakTierLabel');
+
+      streakBadge.classList.remove('streak-tier-0', 'streak-tier-1', 'streak-tier-2', 'streak-tier-3', 'streak-tier-4');
+
+      let label = 'Sin racha';
+
+      if (uniqueDaysCount === 0) {
+        streakBadge.classList.add('streak-tier-0');
+        label = 'Fuego Apagado (Gris)';
+      } else if (uniqueDaysCount === 1) {
+        streakBadge.classList.add('streak-tier-1');
+        label = 'Llama Naranja';
+      } else if (uniqueDaysCount === 2) {
+        streakBadge.classList.add('streak-tier-2');
+        label = 'Plasma Azul/Cyan';
+      } else if (uniqueDaysCount === 3) {
+        streakBadge.classList.add('streak-tier-3');
+        label = 'Llama Magenta';
+      } else {
+        streakBadge.classList.add('streak-tier-4');
+        label = '¡Fuego Arcoíris!';
+      }
+
+      streakDisplay.innerText = uniqueDaysCount + (uniqueDaysCount === 1 ? ' Día' : ' Días');
+      streakTierLabel.innerText = label;
+    }
+
+    // Calendar Engine
+    function renderCalendar() {
+      const calMonthYear = document.getElementById('calMonthYear');
+      const calGrid = document.getElementById('calendarDays');
+      const history = JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]');
+      const historyMap = {};
+      history.forEach(h => { historyMap[h.date] = h; });
+
+      const year = calDate.getFullYear();
+      const month = calDate.getMonth();
+
+      const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      calMonthYear.innerText = monthNames[month] + ' ' + year;
+
+      const firstDay = new Date(year, month, 1);
+      const startingDay = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const todayStr = getTodayISOString();
+
+      calGrid.innerHTML = '';
+
+      // Blank slots
+      for (let i = 0; i < startingDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'cal-day empty';
+        calGrid.appendChild(emptyDiv);
+      }
+
+      // Actual days
+      for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'cal-day';
+        
+        const currentIsoDate = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
+
+        if (currentIsoDate === todayStr) {
+          dayDiv.classList.add('today');
+        }
+
+        const dateNumberSpan = document.createElement('span');
+        dateNumberSpan.innerText = dayNum;
+        dayDiv.appendChild(dateNumberSpan);
+
+        if (historyMap[currentIsoDate]) {
+          const entry = historyMap[currentIsoDate];
+          dayDiv.classList.add('completed-day');
+
+          const badge = document.createElement('span');
+          badge.className = 'cal-day-badge';
+          if (entry.dayId === 'dia1') {
+            badge.classList.add('d1');
+            badge.innerText = 'D1';
+          } else if (entry.dayId === 'dia2') {
+            badge.classList.add('d2');
+            badge.innerText = 'D2';
+          } else {
+            badge.classList.add('d3');
+            badge.innerText = 'D3';
+          }
+          dayDiv.appendChild(badge);
+        }
+
+        dayDiv.onclick = () => openDayDetails(currentIsoDate);
+        calGrid.appendChild(dayDiv);
+      }
+    }
+
+    function prevMonth() {
+      calDate.setMonth(calDate.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      calDate.setMonth(calDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    // Modal Details for Calendar Days
+    function openDayDetails(dateStr) {
+      const history = JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]');
+      const entry = history.find(h => h.date === dateStr);
+
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const modalDateTitle = document.getElementById('modalDateTitle');
+      const modalBody = document.getElementById('modalBody');
+
+      modalDateTitle.innerText = 'Entrenamiento • ' + dateStr;
+
+      if (!entry) {
+        modalBody.innerHTML = '<p style="margin-bottom:16px;">No hay entrenamientos registrados para este día.</p>' +
+          '<p style="font-size:0.8rem; color:var(--text-subtle);">Completa los ejercicios de cualquier día de la rutina y pulsa <strong>¡Finalizar Día!</strong> para marcarlo.</p>';
+      } else {
+        let exercisesHtml = '';
+        if (entry.exercises) {
+          for (const k in entry.exercises) {
+            const item = entry.exercises[k];
+            exercisesHtml += '<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);">' +
+              '<span style="color:#fff; font-weight:600;">' + item.name + '</span>' +
+              '<span style="color:#38bdf8; font-size:0.85rem;">' + item.weight + ' • ' + item.reps + '</span>' +
+              '</div>';
+          }
+        }
+        modalBody.innerHTML = '<div style="background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); padding:10px 14px; border-radius:10px; margin-bottom:14px; color:#a7f3d0; font-weight:700;">' +
+          '✓ ' + (entry.dayTitle || entry.dayId) + ' Completado</div>' +
+          '<div style="margin-top:12px;">' + exercisesHtml + '</div>' +
+          '<div style="margin-top:20px; text-align:right;">' +
+          '<button class="reset-day-btn" onclick="removeHistoryEntry(&quot;' + dateStr + '&quot;)">Eliminar registro</button></div>';
+      }
+
+      modalBackdrop.classList.add('open');
+    }
+
+    function removeHistoryEntry(dateStr) {
+      if (!confirm('¿Eliminar el registro de entrenamiento de esta fecha?')) return;
+      let history = JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]');
+      history = history.filter(h => h.date !== dateStr);
+      localStorage.setItem(KEY_HISTORY, JSON.stringify(history));
+      closeModalDirect();
+      renderCalendar();
+      updateStreak();
+      showToast('Registro eliminado');
+    }
+
+    function closeModal(event) {
+      if (event.target.id === 'modalBackdrop') {
+        closeModalDirect();
+      }
+    }
+
+    function closeModalDirect() {
+      document.getElementById('modalBackdrop').classList.remove('open');
+    }
+
+    // Toast Notification helper
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.innerText = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // High performance Lightweight Confetti
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#f43f5e', '#a855f7'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+          y: canvas.height * 0.7,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() * -18) - 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 8 + 4,
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        frames++;
+        let alive = false;
+
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.5;
+          p.vx *= 0.98;
+          p.rot += p.vrot;
+
+          if (p.y < canvas.height) alive = true;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        });
+
+        if (alive && frames < 140) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+  </script>
+</body>
+</html>
+
